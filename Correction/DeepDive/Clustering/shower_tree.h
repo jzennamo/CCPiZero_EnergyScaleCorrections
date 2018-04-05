@@ -118,9 +118,9 @@ shower_tree::shower_tree(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/Users/jzennamo/CCPiZero_EnergyScaleStudies/Files/BT_backgrounds_two.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../../Files/BT_backgrounds_two.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("/Users/jzennamo/CCPiZero_EnergyScaleStudies/Files/BT_backgrounds_two.root");
+         f = new TFile("../../Files/BT_backgrounds_two.root");
       }
       f->GetObject("shower_tree",tree);
 
