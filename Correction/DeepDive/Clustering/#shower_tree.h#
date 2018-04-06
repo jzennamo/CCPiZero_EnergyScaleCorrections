@@ -108,7 +108,6 @@ public :
    virtual void     Show(Long64_t entry = -1);
    bool inRange(unsigned low, unsigned high, unsigned x);
    double TruncMean(TH1D* hist);
-
 };
 
 #endif

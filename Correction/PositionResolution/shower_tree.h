@@ -106,9 +106,6 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   bool inRange(unsigned low, unsigned high, unsigned x);
-   double TruncMean(TH1D* hist);
-
 };
 
 #endif
@@ -116,12 +113,12 @@ public :
 #ifdef shower_tree_cxx
 shower_tree::shower_tree(TTree *tree) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
+// if parameter tree is not specified (or zero), connect the fileOB
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../../Files/BT_backgrounds_two.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../Files/BT_backgrounds_two.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("../../Files/BT_backgrounds_two.root");
+	f = new TFile("../Files/BT_backgrounds_two.root");
       }
       f->GetObject("shower_tree",tree);
 
@@ -152,38 +149,6 @@ Long64_t shower_tree::LoadTree(Long64_t entry)
       Notify();
    }
    return centry;
-}
-
-bool shower_tree::inRange(unsigned low, unsigned high, unsigned x)
-{
-  return  ((x-low) <= (high-low));
-}
-
-double shower_tree::TruncMean(TH1D* hist)
-{
-  int n = hist->GetXaxis()->GetNbins();  
-  std::vector<double>  x(n);
-  hist->GetXaxis()->GetCenter( &x[0] );
-  const double * y = hist->GetArray(); 
-  double med =  TMath::Median(n, &x[0], &y[1]); 
-  double rms = hist->GetRMS(); 
-  
-  double avg = 0;
-  double nt = 0;
-  for(int i = 0; i < n; i++){
-    if(x[i] < med+rms && x[i] > med-rms){
-      
-      avg += x[i]*y[i+1];
-      nt += y[i+1];
-    }
-  }
-  
-  if(avg != 0 && nt != 0){    
-    return avg/nt;
-  }
-
-  return 0;
-
 }
 
 void shower_tree::Init(TTree *tree)

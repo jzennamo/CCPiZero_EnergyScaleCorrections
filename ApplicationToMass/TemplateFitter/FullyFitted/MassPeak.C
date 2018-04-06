@@ -1,6 +1,8 @@
-void CurrentNorms_LargeRange_NewCorrectionVarBin(){
+void MassPeak(){
 
   gStyle->SetOptStat(0);
+  gStyle->SetStatBorderSize(0);
+  gStyle->SetStatColor(0);
   //  gStyle->SetTitleFontSize(.08);
   gStyle->SetLabelSize(.045, "XY");
   gStyle->SetTitleSize(.045, "XY");
@@ -10,7 +12,6 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
   gStyle->SetMarkerStyle(33);
   gStyle->SetMarkerSize(1.3);
 
-
   std::vector< string > sel;
   //sel = {"one","two"};
   sel = {"two"};
@@ -18,10 +19,13 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
   //vars = {"Nshw","Mult","Vy","Vx","Vz","Lmu","muCosTheta","muPhi","OpenAngle","ConvDist","Egamma","Mass","EgammaCorr","MassCorr"};
   vars = {"Mass","MassCorr"};
 
+  std::vector< string > vars_fancy;
+  vars_fancy = {"Uncorrected Energy","Corrected Energy"};
+
   std::vector< string > bkgds;
-  bkgds = {"sig","fsem","sce","mult","nc","other", "cosplusnu"};
+  //bkgds = {"sig","fsem","sce","mult","nc","other", "cosplusnu"};
   //bkgds = {"sig"};
-  //bkgds = {"fsem","sce","mult","nc","other", "cosplusnu"};
+  bkgds = {"fsem","sce","mult","nc","other", "cosplusnu"};
 
   std::vector< string > bkgds_fancy;
   bkgds_fancy = {"#nu_{#mu} CC #pi^{0} ","#nu_{#mu} CC Final State EM","#nu_{#mu} CC Charge Exch.","#nu_{#mu} CC Mult #pi^{0}","#nu_{#mu} NC #pi^{0}","Other", "Cosmic+#nu"};
@@ -35,11 +39,11 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
   
   for(int i = 0; i < sel.size(); i++){
     OnFile[i]  = 
-      new TFile(Form("../TemplateMaker/NewCorrectionVarWidth/output_onbeam_%s.root",sel[i].c_str()));
+      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_onbeam_%s.root",sel[i].c_str()));
     OffFile[i] = 
-      new TFile(Form("../TemplateMaker/NewCorrectionVarWidth/output_offbeam_%s.root",sel[i].c_str()));
+      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_offbeam_%s.root",sel[i].c_str()));
     MCFile[i]  = 
-      new TFile(Form("../TemplateMaker/NewCorrectionVarWidth/output_mc_%s.root",sel[i].c_str()));      
+      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_mc_%s.root",sel[i].c_str()));      
   }
 
   std::vector< std::vector< TH1D*> > On;
@@ -108,7 +112,7 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
 
 
 	//MC[i][j][k]->Rebin(4);
-	//On[i][j]->Add(MC[i][j][k],-1);
+	On[i][j]->Add(MC[i][j][k],-1);
 	
       }
     }
@@ -140,8 +144,13 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
 
 
   TLatex Title;
+  Title.SetTextColor(kRed);
   Title.SetTextAlign(23);
   Title.SetTextSize(0.05);
+
+  TLatex Title2;
+  //  Title.SetTextAlign(23);
+  Title2.SetTextSize(0.045);
      
   for(int i = 0; i < sel.size(); i++){
     for(int j = 0; j < vars.size(); j++){
@@ -150,16 +159,27 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
       c[i][j] = new TCanvas(Form("c_%d_%d",i,j));
       c[i][j]->cd();
       // The Stac
-      On[i][j]->GetYaxis()->SetTitle("Events / MeV");
+      On[i][j]->GetYaxis()->SetTitle("(Data-Bkgd) / MeV");
       On[i][j]->GetXaxis()->SetTitle("M_{12} [MeV]");
       On[i][j]->SetMaximum(On[i][j]->GetMaximum()*1.3);
       On[i][j]->SetMinimum(0.001);
       On[i][j]->Draw("");            
       On[i][j]->UseCurrentStyle();
-      Stack[i][j]->Draw("hist same");
+      //      Stack[i][j]->Draw("hist same");
       On[i][j]->Draw("esame");            
       On[i][j]->Draw("e1p same");      
       gPad->RedrawAxis();
+
+      TF1* fit = new TF1("fit","expo(0)+gaus(2)",0,800);
+      fit->SetParLimits(2, 0, 500);
+      fit->SetParameter(3, 135);
+      fit->SetParameter(4, 50);
+
+      On[i][j]->Fit("fit");
+      fit->SetLineColor(kRed);
+      fit->SetLineWidth(3);
+      fit->Draw("same");
+
       //Signal Only
        /*
        MC[i][j][0]->Draw("");
@@ -183,22 +203,31 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
       line2.SetLineColor(kRed);
       line2.SetLineStyle(2);
       line2.SetLineWidth(2);
-      line2.DrawLine(35,On[i][j]->GetMinimum(),35,On[i][j]->GetMaximum());
-      line2.DrawLine(230,On[i][j]->GetMinimum(),230,On[i][j]->GetMaximum());
+      //line2.DrawLine(35,On[i][j]->GetMinimum(),35,On[i][j]->GetMaximum());
+      //line2.DrawLine(230,On[i][j]->GetMinimum(),230,On[i][j]->GetMaximum());
       
       
-      TLegend* leg = new TLegend(0.45, 0.45, 0.88, 0.88);
-      leg->AddEntry(On[i][j], "(On-beam - Off-beam) Data", "pl");
-      for(int k = 0; k < bkgds.size(); k++){
-	leg->AddEntry(MC[i][j][k], Form("%s",bkgds_fancy[k].c_str()), "f");
-      }
+      TLegend* leg = new TLegend(0.45, 0.7, 0.88, 0.88);
+      leg->SetHeader(Form("%s",vars_fancy[j].c_str()));
+      leg->AddEntry(On[i][j], "Data - Backgrounds", "pl");   
+      leg->AddEntry(fit, "Exponential+Gaussian Fit", "l");   
       leg->SetLineColor(kWhite);
       leg->SetTextSize(0.045);
       leg->Draw("same");
 
-
-      //Title.DrawLatexNDC(0.5,0.95,Form("%s for the %s shower selection",vars[j].c_str(),sel[i].c_str()));
+      Title.DrawLatexNDC(0.5,0.95,"MicroBooNE Preliminary          1.6#times10^{20} POT");
     
+      Title2.DrawLatexNDC(0.45,0.35,Form("Fitted Peak : (%4.0f #pm %4.0f) MeV",
+				       fit->GetParameter(3),
+				       fit->GetParError(3)));
+      Title2.DrawLatexNDC(0.45,0.30,Form("Fitted Width : (%4.0f #pm %4.0f) MeV",
+				       fabs(fit->GetParameter(4)),
+				       fit->GetParError(4)));
+
+      Title2.DrawLatexNDC(0.45,0.25,Form("#chi^{2}/dof : (%4.1f / %d)",
+				       fit->GetChisquare(),
+				       fit->GetNDF()));
+
 
     }
   }

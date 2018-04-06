@@ -165,7 +165,7 @@ void tree::Loop()
 
       double pi = sqrt(2*tree::Ec(pi0_low_reco_gammaE)*tree::Ec(pi0_high_reco_gammaE)*(1-cos(pi0_oangle))); 
 
-      if(pi < 230 && pi > 35){
+      if(pi < 180 && pi > 40){
 	All++;
 	if(c == 0){Sig++;}
       }

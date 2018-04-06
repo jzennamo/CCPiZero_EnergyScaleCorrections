@@ -10,7 +10,7 @@ void shower_tree::Loop()
    gStyle->SetStatBorderSize(0);
 
    TF1* E_corr_clus =
-     new TF1("E_corr_clus",Form("(x-%f)/%f",7.94482,0.681615),0,5000);
+     new TF1("E_corr_clus","(x-15.412)/0.725477",0,5000);
 
   
   //15 
@@ -69,6 +69,11 @@ void shower_tree::Loop()
   line.SetLineStyle(2);
   line.SetLineWidth(2);
   
+  TLine line2; 
+  line2.SetLineColor(kGreen);
+  line2.SetLineStyle(2);
+  line2.SetLineWidth(2);
+
   std::vector<TF1*> fit; fit.resize(RecoE.size());
 
   for(int i = 0; i < RecoE.size(); i++){
@@ -103,6 +108,7 @@ void shower_tree::Loop()
     TrueE[i]->Draw("same");
 
     line.DrawLine(RecoE[i]->GetMean(1),0,RecoE[i]->GetMean(1),max);    
+    line2.DrawLine(TruncMean(RecoE[i]),0,TruncMean(RecoE[i]),max);
 
     TLegend* leg = new TLegend(0.1, 0.7, 0.45, 0.92);
     leg->AddEntry(TrueE[i], "Deposited Energy", "l");
@@ -117,8 +123,10 @@ void shower_tree::Loop()
   }
 
   for(int i = 0; i < RecoE.size(); i++){
-    std::cout << fit[i]->GetParameter(1)<<"," << std::endl;
+    std::cout << fit[i]->GetParameter(1) <<"," << std::endl;
   }
+
+  std::cout << "/n /n /n" << std::endl;
 
   for(int i = 0; i < RecoE.size(); i++){
     std::cout << fit[i]->GetParError(1)<<"," << std::endl;
