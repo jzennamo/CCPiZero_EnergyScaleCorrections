@@ -1,5 +1,8 @@
 void FittedCorrection(){
 
+  gStyle->SetOptStat(0);
+  gStyle->SetOptFit(1111);  
+
   std::vector<double> fitted = {30,
 				50,
 				69.0438,
@@ -37,10 +40,11 @@ void FittedCorrection(){
     Fit->SetBinError(i+1,  err[i]);
     
   }
-  
+  Fit->GetXaxis()->SetTitle("Perfectly Clustered Shower Energy [MeV]");
+  Fit->GetYaxis()->SetTitle("MPV of Reconstructed Shower Energy [MeV]");  
   Fit->SetLineColor(kRed);
   Fit->SetLineWidth(2);  
   Fit->Draw("");
   Fit->Fit("pol1");
-  
+
 }

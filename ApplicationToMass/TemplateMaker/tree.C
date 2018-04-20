@@ -56,13 +56,17 @@ void tree::Loop()
     Egamma[i] = 
       new TH1D(Form("Egamma_%s",bkgds[i].c_str()),";;", 15, 0, 1200 );      
     
-    double bins[10]={0,40,80,120,160,180,200,300,500,800};
+    //double bins[9]={0,40,80,120,160,200,300,500,800};
+    double bins[9]={11,50,75,100,120,130,140,160,230};
+    
     Mass[i] = 
-      new TH1D(Form("Mass_%s",bkgds[i].c_str()),";;",9,bins);        
-   EgammaCorr[i] = 
+      new TH1D(Form("Mass_%s",bkgds[i].c_str()),";;",8,bins);        
+    //new TH1D(Form("Mass_%s",bkgds[i].c_str()),";;",10,25,220);        
+    EgammaCorr[i] = 
       new TH1D(Form("EgammaCorr_%s",bkgds[i].c_str()),";;", 15, 0, 1200 );      
     MassCorr[i] = 
-      new TH1D(Form("MassCorr_%s",bkgds[i].c_str()),";;",9,bins);        
+      new TH1D(Form("MassCorr_%s",bkgds[i].c_str()),";;",8,bins);        
+    //new TH1D(Form("MassCorr_%s",bkgds[i].c_str()),";;",10,25,220);        
     TrueE[i] = 
       new TH1D(Form("TrueE_%s",bkgds[i].c_str()),";;",10,0,500);        
     
@@ -75,6 +79,8 @@ void tree::Loop()
 
    int Sig = 0;
    int All = 0;
+   int Sig_cut = 0;
+   int All_cut = 0;
 
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -85,11 +91,12 @@ void tree::Loop()
 
       int c = -1;
       if(!twoshow){
-	if(bkgd_id == 2){ c = 0;} //signal     
+	std::cout << "woot" << std::endl;
+	if(bkgd_id == 2 && pi0_low_origin != 2 && pi0_high_origin != 2){ c = 0;} //signal     
 	else if(((bkgd_id == 4  || 
 		  bkgd_id == 9  || 
 		  bkgd_id == 10 || 
-		  bkgd_id==11   || 
+		  bkgd_id == 11 || 
 		  bkgd_id ==12  || 
 		  bkgd_id ==13) && (gamma_type == 1))){ c = 1;} //FSEM
 	else if(bkgd_id == 8){ c = 2; } // SCE
@@ -108,7 +115,7 @@ void tree::Loop()
 	else{std::cout << "da fuck " << bkgd_id << " is MC? " << data << std::endl; continue;}
       }
       else{
-	if(bkgd_id == 2){ c = 0;} //signal     
+	if(bkgd_id == 2 && pi0_low_origin != 2 && pi0_high_origin != 2){ c = 0;} //signal     
 	else if(bkgd_id == 3){ c = 4; } // NC pizero
 	else if(bkgd_id == 5){ c = 3; } // mult-pizero
 	else if(bkgd_id == 8){ c = 2; } // SCE
@@ -136,8 +143,8 @@ void tree::Loop()
 
 
       if(twoshow){
-	//if(pi0_high_reco_gammaE < 50 ||
-	//pi0_low_reco_gammaE  < 50) continue;
+	if(pi0_high_reco_gammaE < 25 ||
+	   pi0_low_reco_gammaE  < 25) continue;
 	if(pi0_oangle < 0.35) continue;
 	if(pi0_IP > 4) continue;
       }
@@ -165,17 +172,21 @@ void tree::Loop()
 
       double pi = sqrt(2*tree::Ec(pi0_low_reco_gammaE)*tree::Ec(pi0_high_reco_gammaE)*(1-cos(pi0_oangle))); 
 
-      if(pi < 180 && pi > 40){
-	All++;
-	if(c == 0){Sig++;}
+      if(pi < 239 && pi > 31){
+	All_cut++;
+	if(c == 0){Sig_cut++;}
       }
+      All++;
+      if(c == 0){Sig++;}
+      
 
       if(pi > maxpi0) maxpi0 = pi;
       
       MassCorr[c]->Fill(pi, scale);            
    }
 
-   std::cout << "Signal " <<  Sig << " All " << All << std::endl;
+   std::cout << "W/O Cut Signal " <<  Sig << " All " << All << std::endl;
+   std::cout << "W/  Cut Signal " <<  Sig_cut << " All " << All_cut << std::endl;
 
    
 

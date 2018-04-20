@@ -4,6 +4,19 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+Double_t Fit(Double_t *x, Double_t *par){
+
+  Double_t arg = 0;
+  Double_t xv = x[0];
+
+  if((xv-par[1])/par[2] >= -par[3]){
+    arg = -0.5*(pow(((xv-par[1])/par[2]),2));}
+  else{
+    arg = (pow(par[3],2)/2.)+par[3]*((xv-par[1])/par[2]);}
+  
+  return par[0]*exp(arg);  
+}
+
 void shower_tree::Loop()
 {
   gStyle->SetOptStat(1000000000);
@@ -45,7 +58,7 @@ void shower_tree::Loop()
 
 
   //Corrections
-  /*
+  
   // Fitted 
   // Clustering
   TF1* E_corr_clus
@@ -53,15 +66,15 @@ void shower_tree::Loop()
   // Hit Thersholding
   TF1* E_corr_hit =
     new TF1("f","0.000785133*(sqrt(2547340000.*x + 665667863369.) - 798389.)",0,5000);
-  */
+  
 
   // Profile 
   // Clustering
-  TF1* E_corr_clus
-    = new TF1("E_corr_clus","(x-7.94482)/0.681615",0,5000);
+  //  TF1* E_corr_clus
+  //  = new TF1("E_corr_clus","(x-7.94482)/0.681615",0,5000);
   // Hit Thersholding
-  TF1* E_corr_hit =
-    new TF1("f","-0.000820487*sqrt(2017450716259. - 3805000000.*x) + 1165.35",0,5000);
+  //TF1* E_corr_hit =
+  //  new TF1("f","-0.000820487*sqrt(2017450716259. - 3805000000.*x) + 1165.35",0,5000);
 
   if (fChain == 0) return;
   
@@ -137,7 +150,7 @@ void shower_tree::Loop()
   E_resClusProf->Draw();
   TF1* fitClus = new TF1("fitClus","pol1",0,250);
   gStyle->SetOptFit(1111);
-  E_resClusProf->Fit("fitClus");
+  E_resClusProf->Fit("fitClus","R");
   
 
   TCanvas* c3 = new TCanvas("c3");
@@ -148,7 +161,7 @@ void shower_tree::Loop()
   TCanvas* c4 = new TCanvas("c4");
   E_resHitProf->Draw();
   TF1* fitHit = new TF1("fitHit","pol2",0,250);
-  E_resHitProf->Fit("fitHit");
+  E_resHitProf->Fit("fitHit","R");
 
 
   TCanvas* c5 = new TCanvas("c5");
@@ -172,13 +185,20 @@ void shower_tree::Loop()
   EresClus1D->SetLineWidth(2);
   EresTot1D->SetLineWidth(2);
   Eres1D->Draw();
-  //EresClus1D->Draw("same");
-  //EresTot1D->Draw("same");
+  EresClus1D->Draw("same");
+
+  TF1* fit = new TF1("fit",Fit,-100,100,4);
+  fit->SetParameter(1, 20);
+  fit->SetParameter(2, 50);
+  EresTot1D->Fit("fit");
+  EresTot1D->Draw("same");
+
+  std::cout << "Mean : " << EresTot1D->GetMean() << std::endl;
 
   TLegend* leg = new TLegend(0.45, 0.45, 0.88, 0.88);
   leg->AddEntry(Eres1D, "Uncorrected", "pl");
-  //  leg->AddEntry(EresClus1D, "Clustering Correction", "pl");
-  //leg->AddEntry(EresTot1D, "Total Correction", "pl");
+  leg->AddEntry(EresClus1D, "Clustering Correction", "pl");
+  leg->AddEntry(EresTot1D, "Total Correction", "pl");
   leg->SetLineColor(kWhite);
   leg->SetTextSize(0.045);
   leg->Draw("same");

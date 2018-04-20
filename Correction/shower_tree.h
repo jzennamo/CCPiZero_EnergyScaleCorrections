@@ -150,7 +150,6 @@ Long64_t shower_tree::LoadTree(Long64_t entry)
    }
    return centry;
 }
-
 void shower_tree::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize

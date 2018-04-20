@@ -38,11 +38,14 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
   
   for(int i = 0; i < sel.size(); i++){
     OnFile[i]  = 
-      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_onbeam_%s.root",sel[i].c_str()));
+      //new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_onbeam_%s.root",sel[i].c_str()));
+      new TFile(Form("../../TemplateMaker/FinerBinningMPV/output_onbeam_%s.root",sel[i].c_str()));
     OffFile[i] = 
-      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_offbeam_%s.root",sel[i].c_str()));
+      //new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_offbeam_%s.root",sel[i].c_str()));
+      new TFile(Form("../../TemplateMaker/FinerBinningMPV/output_offbeam_%s.root",sel[i].c_str()));
     MCFile[i]  = 
-      new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_mc_%s.root",sel[i].c_str()));      
+      //new TFile(Form("../../TemplateMaker/NewCorrectionVarWidthFullyFitted/output_mc_%s.root",sel[i].c_str()));      
+      new TFile(Form("../../TemplateMaker/FinerBinningMPV/output_mc_%s.root",sel[i].c_str()));      
   }
 
   std::vector< std::vector< TH1D*> > On;
@@ -67,12 +70,12 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
       On[i][j] = (TH1D*)OnFile[i]->Get(Form("%s_data",vars[j].c_str()));
       Off[i][j] = (TH1D*)OffFile[i]->Get(Form("%s_data",vars[j].c_str()));
       On[i][j]->Add(Off[i][j],-1);      
-
+      /*
       for(int b = 1; b <= 11; b++){
 	On[i][j]->SetBinError(b,On[i][j]->GetBinError(b)/On[i][j]->GetBinWidth(b));
 	On[i][j]->SetBinContent(b,On[i][j]->GetBinContent(b)/On[i][j]->GetBinWidth(b));
       }
-
+      */
 
       //On[i][j]->Rebin(4);
       //Off[i][j]->Rebin(4);
@@ -103,12 +106,12 @@ void CurrentNorms_LargeRange_NewCorrectionVarBin(){
 	
 	MC[i][j][k]->SetFillColor(color[k]);
 	MC[i][j][k]->SetLineColor(color[k]);
-	
+	/*
 	for(int b = 1; b <= 11; b++){
 	  MC[i][j][k]->SetBinError(b,MC[i][j][k]->GetBinError(b)/MC[i][j][k]->GetBinWidth(b));
 	  MC[i][j][k]->SetBinContent(b, MC[i][j][k]->GetBinContent(b)/ MC[i][j][k]->GetBinWidth(b));
 	}
-
+	*/
 
 	//MC[i][j][k]->Rebin(4);
 	//On[i][j]->Add(MC[i][j][k],-1);

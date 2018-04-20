@@ -1,3 +1,17 @@
+Double_t Fit(Double_t *x, Double_t *par){
+
+  Double_t arg = 0;
+  Double_t xv = x[0];
+
+  if((xv-par[1])/par[2] >= -par[3]){
+    arg = -0.5*(pow(((xv-par[1])/par[2]),2));}
+  else{
+    arg = (pow(par[3],2)/2.)+par[3]*((xv-par[1])/par[2]);}
+  
+  return par[0]*exp(arg);  
+}
+
+
 void MassPeak(){
 
   gStyle->SetOptStat(0);
@@ -112,7 +126,7 @@ void MassPeak(){
 
 
 	//MC[i][j][k]->Rebin(4);
-	On[i][j]->Add(MC[i][j][k],-1);
+	//On[i][j]->Add(MC[i][j][k],-1);
 	
       }
     }
@@ -170,12 +184,25 @@ void MassPeak(){
       On[i][j]->Draw("e1p same");      
       gPad->RedrawAxis();
 
-      TF1* fit = new TF1("fit","expo(0)+gaus(2)",0,800);
+      /*
+      TF1* fit = new TF1("fit","expo(0)+gaus(2)",50,300);      
       fit->SetParLimits(2, 0, 500);
       fit->SetParameter(3, 135);
       fit->SetParameter(4, 50);
-
-      On[i][j]->Fit("fit");
+      */
+      /*
+      TF1* fit = new TF1("fit","gaus",50,300);      
+      fit->SetParLimits(0, 0, 500);
+      fit->SetParameter(1, 135);
+      fit->SetParameter(2, 50);
+      */
+      
+      TF1* fit = new TF1("fit",Fit,0,200,4);
+      fit->SetParLimits(0, 0, 500);
+      fit->SetParameter(1, 135);
+      fit->SetParameter(2, 50);
+      
+      On[i][j]->Fit("fit","R");
       fit->SetLineColor(kRed);
       fit->SetLineWidth(3);
       fit->Draw("same");
@@ -198,32 +225,40 @@ void MassPeak(){
       line.SetLineStyle(2);
       line.SetLineWidth(2);
       line.DrawLine(135,On[i][j]->GetMinimum(),135,On[i][j]->GetMaximum());
-      //On[i][j]->Draw("");      
       TLine line2;
       line2.SetLineColor(kRed);
       line2.SetLineStyle(2);
       line2.SetLineWidth(2);
-      //line2.DrawLine(35,On[i][j]->GetMinimum(),35,On[i][j]->GetMaximum());
-      //line2.DrawLine(230,On[i][j]->GetMinimum(),230,On[i][j]->GetMaximum());
       
       
       TLegend* leg = new TLegend(0.45, 0.7, 0.88, 0.88);
       leg->SetHeader(Form("%s",vars_fancy[j].c_str()));
       leg->AddEntry(On[i][j], "Data - Backgrounds", "pl");   
-      leg->AddEntry(fit, "Exponential+Gaussian Fit", "l");   
+      //leg->AddEntry(fit, "Exponential+Gaussian Fit", "l");   
+      leg->AddEntry(fit, "Gaussian Fit", "l");   
       leg->SetLineColor(kWhite);
       leg->SetTextSize(0.045);
       leg->Draw("same");
 
       Title.DrawLatexNDC(0.5,0.95,"MicroBooNE Preliminary          1.6#times10^{20} POT");
-    
+
+      Title2.DrawLatexNDC(0.45,0.42,"Fit Over Range M_{12} = [50,300]");
+      
+      Title2.DrawLatexNDC(0.45,0.35,Form("Fitted Peak : (%4.0f #pm %4.0f) MeV",
+					 fit->GetParameter(1),
+					 fit->GetParError(1)));
+      Title2.DrawLatexNDC(0.45,0.30,Form("Fitted Width : (%4.0f #pm %4.0f) MeV",
+					 fabs(fit->GetParameter(2)),
+					 fit->GetParError(2)));
+      
+	/*
       Title2.DrawLatexNDC(0.45,0.35,Form("Fitted Peak : (%4.0f #pm %4.0f) MeV",
 				       fit->GetParameter(3),
 				       fit->GetParError(3)));
       Title2.DrawLatexNDC(0.45,0.30,Form("Fitted Width : (%4.0f #pm %4.0f) MeV",
 				       fabs(fit->GetParameter(4)),
 				       fit->GetParError(4)));
-
+	*/
       Title2.DrawLatexNDC(0.45,0.25,Form("#chi^{2}/dof : (%4.1f / %d)",
 				       fit->GetChisquare(),
 				       fit->GetNDF()));

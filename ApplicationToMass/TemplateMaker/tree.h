@@ -40,14 +40,17 @@ class tree {
    //Profile
    //TF1* E_corr_clus
    //  = new TF1("E_corr_clus","(x-7.94482)/0.681615",0,5000);   
-   // TF1* E_corr_hit 
+   //TF1* E_corr_hit 
    //  = new TF1("f","-0.000820487*sqrt(2017450716259. - 3805000000.*x) + 1165.35",0,5000);
 
    //Fitting 
-   TF1* E_corr_clus
-     = new TF1("E_corr_clus","(x-15.412)/0.725477",0,5000);   
-   TF1* E_corr_hit =
-    new TF1("f","0.000785133*(sqrt(2547340000.*x + 665667863369.) - 798389.)",0,5000);
+   //   TF1* E_corr_clus= new TF1("E_corr_clus","(x-15.412)/0.725477",0,5000);   
+   //TF1* E_corr_hit = new TF1("f","0.000785133*(sqrt(2547340000.*x + 665667863369.) - 798389.)",0,5000);
+
+   //CrazyIdea
+   TF1* E_corr_clus = new TF1("clus","(9.93885e-01+x*(3.07774e-04))*x",0,250);
+   TF1* E_corr_hit = new TF1("hit","(1.24497+x*(-2.01225e-04))*x",0,250);
+   TF1* E_corr_true = new TF1("true","x*(9.43398e-01+(4.42796e-04)*x)",0,250);
 
    // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -380,7 +383,7 @@ tree::tree(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
 
-  string mc = "mc";
+  string mc = "onbeam";
   string samp = "two";
   
   if(mc.find("beam") != 18446744073709551615){
